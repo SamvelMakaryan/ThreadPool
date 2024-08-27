@@ -34,5 +34,12 @@ int main() {
     for (int i = 0; i < size; ++i) {
         results.emplace_back(pool.execute([=]{return i*i;}));
         std::cout << results[i].get() << " ";
-    }    
+    }   
+    std::cout << std::endl;
+    pool.stop();
+    try {
+        pool.execute([](){});
+    } catch (std::runtime_error ex) {
+        std::cerr << ex.what() << std::endl;
+    }
 }
