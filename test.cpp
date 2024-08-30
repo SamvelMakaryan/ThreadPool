@@ -15,7 +15,7 @@ struct Coordinates {
 };
 
 double add(double a, double b) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     return a + b;
 }
 
@@ -27,14 +27,16 @@ int main() {
     const int size = 5;
 
     thread::ThreadPool pool;
+    pool.execute([](char c){std::cout << '{' << c << "}" << std::endl;}, 'Z');
     pool.execute(&Coordinates::display, coordinates);
     std::future<double> sum = pool.execute(add, a, b);
     std::cout << "Sum = " << sum.get() << std::endl;
-    pool.execute([](char c){std::cout << '{' << c << "}" << std::endl;}, 'Z');
     for (int i = 0; i < size; ++i) {
         results.emplace_back(pool.execute([=]{return i*i;}));
-        std::cout << results[i].get() << " ";
     }   
+    for (int i = 0; i < size; ++i) {
+        std::cout << results[i].get() << " ";
+    }
     std::cout << std::endl;
     pool.stop();
     try {

@@ -37,7 +37,7 @@ namespace thread {
 
     void ThreadPool::run() noexcept {
         while (!m_stop_request) {
-            std::function<void()> task;
+            std::packaged_task<void()> task;
             std::unique_lock lock(m_mtx);
             m_cv.wait(lock, [this] {
                 return !m_tasks.empty() || m_stop_request;

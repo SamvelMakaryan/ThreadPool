@@ -3,14 +3,12 @@
 
 #include <condition_variable>
 #include <type_traits>
-#include <functional>
 #include <stdexcept>
 #include <utility>
 #include <vector>
 #include <thread>
 #include <atomic>
 #include <future>
-#include <memory>
 #include <mutex>
 #include <queue>
 
@@ -27,14 +25,14 @@ namespace thread {
             ~ThreadPool();
         public:
             void stop();
-            template <typename F, typename... Args>
-            std::future<std::invoke_result_t<F, Args...>> execute(F&&, Args&&...);
+            template <typename F, typename... Args, typename return_type = std::invoke_result_t<F, Args...>>
+            std::future<return_type> execute(F&&, Args&&...);
         private:
             void run() noexcept;
         private:
             constinit const static int m_minimum_thread_count = 2;
             std::vector<std::thread> m_threads;
-            std::queue<std::function<void()>> m_tasks;
+            std::queue<std::packaged_task<void()>> m_tasks;
             std::mutex m_mtx;
             std::condition_variable m_cv;
             std::atomic<bool> m_stop_request;
