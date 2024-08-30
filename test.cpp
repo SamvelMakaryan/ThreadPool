@@ -27,17 +27,26 @@ int main() {
     const int size = 5;
 
     thread::ThreadPool pool;
+    
     pool.execute([](char c){std::cout << '{' << c << "}" << std::endl;}, 'Z');
+    
     pool.execute(&Coordinates::display, coordinates);
+    
     std::future<double> sum = pool.execute(add, a, b);
     std::cout << "Sum = " << sum.get() << std::endl;
+    
+    pool.addNewThread();
+    
     for (int i = 0; i < size; ++i) {
-        results.emplace_back(pool.execute([=]{return i*i;}));
+        results.emplace_back(pool.execute([=]{return i * i;}));
     }   
     for (int i = 0; i < size; ++i) {
         std::cout << results[i].get() << " ";
     }
     std::cout << std::endl;
+    
+    std::cout << "Threads count - " << pool.size() << std::endl;
+
     pool.stop();
     try {
         pool.execute([](){});

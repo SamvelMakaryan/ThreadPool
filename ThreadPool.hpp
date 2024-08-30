@@ -27,6 +27,8 @@ namespace thread {
             void stop();
             template <typename F, typename... Args, typename return_type = std::invoke_result_t<F, Args...>>
             std::future<return_type> execute(F&&, Args&&...);
+            int size() const;
+            void addNewThread();
         private:
             void run() noexcept;
         private:

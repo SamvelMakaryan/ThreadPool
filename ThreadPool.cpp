@@ -35,6 +35,15 @@ namespace thread {
         m_cv.notify_all();
     }
 
+    int ThreadPool::size() const {
+        return m_threads.size();
+    }
+
+    void ThreadPool::addNewThread() {
+        std::lock_guard lock(m_mtx);
+        m_threads.emplace_back(&ThreadPool::run, this);
+    }
+
     void ThreadPool::run() noexcept {
         while (!m_stop_request) {
             std::packaged_task<void()> task;
