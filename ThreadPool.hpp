@@ -3,7 +3,9 @@
 
 #include <condition_variable>
 #include <type_traits>
+#include <functional>
 #include <stdexcept>
+#include <concepts>
 #include <utility>
 #include <vector>
 #include <thread>
@@ -13,7 +15,7 @@
 #include <queue>
 
 namespace thread {
-   
+
     class ThreadPool {
         public:    
             ThreadPool();
@@ -25,10 +27,11 @@ namespace thread {
             ~ThreadPool();
         public:
             void stop();
-            template <typename F, typename... Args, typename return_type = std::invoke_result_t<F, Args...>>
-            std::future<return_type> execute(F&&, Args&&...);
             int size() const;
             void addNewThread();
+
+            template <typename F, typename... Args, typename return_type = std::invoke_result_t<F, Args...>>
+            std::future<return_type> execute(F&&, Args&&...) requires std::invocable<F, Args...>;
         private:
             void run() noexcept;
         private:
