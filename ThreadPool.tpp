@@ -7,7 +7,7 @@ namespace thread {
  
     template <typename F, typename... Args, typename return_type = std::invoke_result_t<F, Args...>>
     std::future<return_type> ThreadPool::execute(F&& f, Args&&... args) requires std::invocable<F, Args...> {
-        if (m_stop_request) {
+        if (m_stop_request.load(std::memory_order_acquire)) {
             throw std::runtime_error("The thread pool has been used after being stopped.");
         }
         

@@ -23,7 +23,7 @@ namespace thread {
     }
 
     ThreadPool::~ThreadPool() {
-        m_stop_request = true;
+        m_stop_request.store(true, std::memory_order_release);
         m_cv.notify_all();
         for (auto& thread : m_threads) {
             thread.join();
@@ -31,7 +31,7 @@ namespace thread {
     }
 
     void ThreadPool::stop() {
-        m_stop_request = true;
+        m_stop_request.store(true, std::memory_order_release);
         m_cv.notify_all();
     }
 
@@ -45,13 +45,13 @@ namespace thread {
     }
 
     void ThreadPool::run() noexcept {
-        while (!m_stop_request) {
+        while (!m_stop_request.load(std::memory_order_acquire)) {
             std::packaged_task<void()> task;
             std::unique_lock lock(m_mtx);
             m_cv.wait(lock, [this] {
-                return !m_tasks.empty() || m_stop_request;
+                return !m_tasks.empty() || m_stop_request.load(std::memory_order_relaxed);
             });
-            if (m_stop_request) {
+            if (m_stop_request.load(std::memory_order_acquire)) {
                 break;
             }
             task = std::move(m_tasks.front());
